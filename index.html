@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oobeo Permits v2 | User Guide</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { margin: 0; font-family: 'Source Sans 3', 'Segoe UI', sans-serif; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary { list-style: none; }
+    details summary::before { content: '\25B6'; display: inline-block; margin-right: 8px; font-size: 10px; transition: transform 0.2s; color: #94a3b8; }
+    details[open] summary::before { transform: rotate(90deg); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    const SECTIONS = [
+      { id: "getting-started", part: "Part 1", title: "Getting Started", roles: ["customer", "employee", "administrator"],
+        children: [
+          { id: "what-is-permits", title: "1.1 What Is Oobeo Permits?" },
+          { id: "access", title: "1.2 How to Access the System" },
+          { id: "concepts", title: "1.3 Key Concepts" },
+        ],
+      },
+      { id: "customer-guide", part: "Part 2", title: "Customer Guide", roles: ["customer"],
+        children: [
+          { id: "finding-permits", title: "2.1 Finding Available Permits" },
+          { id: "applying", title: "2.2 Applying for a Permit" },
+          { id: "app-status", title: "2.3 Application Status" },
+          { id: "paying", title: "2.4 Paying for Your Permit" },
+          { id: "managing-permit", title: "2.5 Managing Your Permit" },
+          { id: "cust-invoices", title: "2.6 Invoices and Billing" },
+          { id: "cust-help", title: "2.7 Getting Help" },
+        ],
+      },
+      { id: "employee-guide", part: "Part 3", title: "Employee Guide", roles: ["employee"],
+        children: [
+          { id: "emp-dashboard", title: "3.1 Dashboard Overview" },
+          { id: "emp-tabs", title: "3.2 Navigating the Tabs" },
+          { id: "emp-create", title: "3.3 Creating a Permit" },
+          { id: "emp-accounts", title: "3.4 Managing Accounts" },
+          { id: "emp-applications", title: "3.5 Reviewing Applications" },
+          { id: "emp-payments", title: "3.6 Processing Payments" },
+          { id: "emp-ar", title: "3.7 Managing Unpaid Invoices" },
+          { id: "emp-modify", title: "3.8 Modifying a Permit" },
+          { id: "emp-comms", title: "3.9 Communications" },
+          { id: "emp-tips", title: "3.10 Tips for Employees" },
+        ],
+      },
+      { id: "admin-guide", part: "Part 4", title: "Administrator Guide", roles: ["administrator"],
+        children: [
+          { id: "admin-locations", title: "4.1 Setting Up a Location" },
+          { id: "admin-rates", title: "4.2 Configuring Rates" },
+          { id: "admin-share", title: "4.3 Managing Share Links" },
+          { id: "admin-roles", title: "4.4 User Roles and Permissions" },
+          { id: "admin-cloning", title: "4.5 Location Cloning" },
+          { id: "admin-tags", title: "4.6 Tags Strategy" },
+        ],
+      },
+      { id: "reports", part: "Part 5", title: "Reports and Exports", roles: ["employee", "administrator"],
+        children: [
+          { id: "tab-exports", title: "5.1 Tab-Level Exports" },
+          { id: "reports-section", title: "5.2 Reports Section" },
+          { id: "ledger", title: "5.3 Ledger Code Exports" },
+        ],
+      },
+      { id: "faq", part: "Appendix", title: "FAQ", roles: ["customer", "employee", "administrator"], children: [] },
+    ];
+
+    const Screenshot = ({ desc }) => (
+      <div className="my-4 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
+        <svg className="mx-auto mb-2" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <p className="text-sm text-gray-400 font-medium">{desc}</p>
+      </div>
+    );
+
+    const Table = ({ headers, rows }) => (
+      <div className="my-4 overflow-x-auto rounded-lg border border-gray-200">
+        <table className="w-full text-sm">
+          <thead><tr className="bg-slate-800 text-white">
+            {headers.map((h, i) => <th key={i} className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider">{h}</th>)}
+          </tr></thead>
+          <tbody>{rows.map((row, i) => (
+            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+              {row.map((cell, j) => <td key={j} className="px-4 py-3 border-t border-gray-100">{cell}</td>)}
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    );
+
+    const Tag = ({ children, color = "blue" }) => {
+      const colors = { blue: "bg-blue-50 text-blue-700 border-blue-200", green: "bg-emerald-50 text-emerald-700 border-emerald-200", purple: "bg-violet-50 text-violet-700 border-violet-200", gray: "bg-gray-100 text-gray-600 border-gray-200" };
+      return <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${colors[color]}`}>{children}</span>;
+    };
+
+    const RoleBadges = ({ roles }) => {
+      const c = { customer: "green", employee: "blue", administrator: "purple" };
+      return <div className="flex gap-1.5 mb-3">{roles.map(r => <Tag key={r} color={c[r]}>{r}</Tag>)}</div>;
+    };
+
+    function GettingStarted() {
+      return <>
+        <section id="what-is-permits">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">1.1 What Is Oobeo Permits?</h2>
+          <p className="mb-3">Oobeo Permits v2 is a web-based permit management system for parking. It lets operators create, sell, and manage parking permits across one or many locations. It handles applications, billing, payments, vehicle tracking, and reporting in one platform.</p>
+          <p className="mb-3">Permits v2 is part of the broader Oobeo platform, which also includes Valet, Self Parking, Attendant Payments, and Event Parking. All products share a common database, so driver records, payment data, and reporting are consolidated.</p>
+          <p className="mb-4">The system is designed around three user types:</p>
+          <Table headers={["Role", "Who They Are", "What They Do"]} rows={[
+            [<strong>Customer</strong>, "Parkers who need a permit", "Browse available permits, apply, pay, manage vehicles, view invoices"],
+            [<strong>Employee</strong>, "Property managers, CS reps, front desk staff", "Create permits, manage accounts, process payments, review applications"],
+            [<strong>Administrator</strong>, "Operations directors, IT admins, system owners", "Set up locations, configure rates, manage users, build share links"],
+          ]} />
+        </section>
+        <section id="access">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">1.2 How to Access the System</h2>
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Employees and Administrators</h3>
+          <p className="mb-3">Access the admin dashboard via your web browser at: <code className="bg-gray-100 px-2 py-0.5 rounded text-sm font-mono">vale.to/controlpanel/permits</code></p>
+          <p className="mb-3">Use Chrome, Firefox, Safari, or Edge (latest versions). No software installation required.</p>
+          <Screenshot desc="Admin login screen" />
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Customers</h3>
+          <p className="mb-3">Customers do not log into the admin dashboard. They interact through:</p>
+          <ul className="list-disc pl-6 space-y-1.5 mb-4 text-slate-600">
+            <li><strong>Share links</strong> sent by email, text, or posted on signage</li>
+            <li><strong>QR codes</strong> printed on signage, in lobbies, or onboarding materials</li>
+            <li><strong>Discovery map</strong>, a public-facing map showing locations with available permits</li>
+            <li><strong>Direct links</strong> from invoices for making payments</li>
+          </ul>
+          <p className="mb-3">No app download required. The entire customer experience is mobile web.</p>
+        </section>
+        <section id="concepts">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">1.3 Key Concepts</h2>
+          <div className="space-y-3">
+            {[["Account", "The billing entity. Can be an individual or an organization. Gets charged for permits."],
+              ["Permit Holder", "The individual person using the permit. May be the same as Account owner or different."],
+              ["Rate", "A pricing configuration defining cost, billing interval, capacity, and availability."],
+              ["Location", "A physical parking facility. Each has its own rates, capacity, and settings."],
+              ["Share Link", "A URL (with QR code) giving customers access to apply. Can be scoped to location, rate, or account."],
+              ["Tags", "Labels on locations for grouping and filtering."]
+            ].map(([term, def]) => (
+              <div key={term} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+                <span className="font-semibold text-slate-800 whitespace-nowrap min-w-[120px]">{term}</span>
+                <span className="text-slate-600">{def}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </>;
+    }
+
+    function CustomerGuide() {
+      return <>
+        <section id="finding-permits">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.1 Finding Available Permits</h2>
+          <p className="mb-4">There are three ways to find and apply for a permit:</p>
+          <div className="grid gap-4 mb-4">
+            {[["Share Link", "Your operator may send you a link via email, text, or website. Clicking opens the application form."],
+              ["QR Code", "Look for QR codes on signage at the facility, in lobbies, or onboarding materials."],
+              ["Discovery Map", "Some operators provide a public map showing all locations with available permits."]
+            ].map(([title, desc]) => (
+              <div key={title} className="p-4 border border-gray-200 rounded-lg">
+                <h4 className="font-semibold text-slate-800 mb-1">{title}</h4>
+                <p className="text-slate-600 text-sm">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <Screenshot desc="Share link landing page showing location and available rates" />
+        </section>
+        <section id="applying">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.2 Applying for a Permit</h2>
+          <ol className="list-decimal pl-6 space-y-2 mb-4 text-slate-600">
+            <li>Select a location (if not pre-selected by the share link).</li>
+            <li>Choose a rate. Each shows price, billing frequency, and any add-on fees.</li>
+            <li>Enter your information: name, email, phone, mailing address.</li>
+            <li>Add your vehicle(s): license plate, color, make, type.</li>
+            <li>Review and submit your application.</li>
+          </ol>
+          <p className="mb-3">After submitting, your application goes to the operator for review.</p>
+          <Screenshot desc="Application form - rate selection step" />
+        </section>
+        <section id="app-status">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.3 Application Status</h2>
+          <Table headers={["Status", "What It Means"]} rows={[
+            [<><span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-2"/>Submitted</>, "Your application is awaiting review."],
+            [<><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"/>Approved</>, "Your permit is active. You'll receive billing information."],
+            [<><span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"/>Rejected</>, "Not approved. Check for a message from the operator."],
+            [<><span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"/>More Info Requested</>, "Operator needs additional information."],
+          ]} />
+        </section>
+        <section id="paying">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.4 Paying for Your Permit</h2>
+          <Table headers={["Method", "How It Works"]} rows={[
+            ["Credit Card", "Pay online through the link in your invoice email."],
+            ["ACH (Bank Transfer)", "Pay online via bank transfer through the invoice link."],
+            ["Cash", "Pay in person at the parking office. Operator records payment."],
+            ["Check", "Mail a check to the address on your invoice."],
+          ]} />
+          <Screenshot desc="Online payment page" />
+        </section>
+        <section id="managing-permit">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.5 Managing Your Permit</h2>
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Changing Your Vehicle</h3>
+          <p className="mb-3">Contact the parking operator to update the vehicle on your permit.</p>
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Cancelling Your Permit</h3>
+          <p className="mb-3">Contact the parking operator. Cancellation policies vary by operator and permit type.</p>
+        </section>
+        <section id="cust-invoices">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.6 Invoices and Billing</h2>
+          <p className="mb-3">Invoices are sent based on your billing interval via your preferred contact method. Overpayments or credits are automatically applied to your next invoice.</p>
+        </section>
+        <section id="cust-help">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.7 Getting Help</h2>
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800">For questions about your permit, billing, or changes, contact your parking operator at: <strong>[operator contact info]</strong></p>
+          </div>
+        </section>
+      </>;
+    }
+
+    function EmployeeGuide() {
+      return <>
+        <section id="emp-dashboard">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.1 Dashboard Overview</h2>
+          <p className="mb-3">When you log in, the dashboard shows an alert for pending applications and a portfolio snapshot: revenue, permit counts, and occupancy. A location filter scopes all data.</p>
+          <Screenshot desc="Dashboard with location filter and summary bar" />
+        </section>
+        <section id="emp-tabs">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.2 Navigating the Tabs</h2>
+          <Table headers={["Tab", "What It Shows", "When You Use It"]} rows={[
+            ["Accounts", "All accounts: name, contact, permit count, balance", "Looking up a customer, checking balances"],
+            ["Permits", "All permits: ID, location, account, holder, status, plates", "Checking status, finding a permit"],
+            ["Rates", "Rates per location: type, capacity, price, interval", "Checking availability, understanding pricing"],
+            ["Invoices", "Billing records: invoice #, date, account, amount, status", "Processing payments, AR follow-up"],
+            ["Locations", "All locations: name, address, occupancy, capacity", "Finding a location, checking capacity"],
+          ]} />
+          <p className="mt-3">Every tab supports <strong>Search</strong>, customizable <strong>Columns</strong>, <strong>Filters</strong>, and <strong>Export</strong>.</p>
+        </section>
+        <section id="emp-create">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.3 Creating a Permit</h2>
+          <p className="mb-4">Click <strong>+ Add Permit</strong> to launch the wizard:</p>
+          <div className="space-y-4">
+            {[["Step 1: Account", "Choose existing or create new. Use existing to keep billing consolidated."],
+              ["Step 2: Location", "Select location. Review Public/Private Notes."],
+              ["Step 3: Permit Details", "Select rate, count, start date. Optional: space number, access ID."],
+              ["Step 4: Permit Holder", "Enter holder info or auto-fill from account. Skippable."],
+              ["Step 5: Vehicles", "Enter plate, color, make, type. Click Create Permit."]
+            ].map(([title, desc], i) => (
+              <div key={i} className="flex gap-4 items-start">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-sm font-bold">{i+1}</div>
+                <div><h4 className="font-semibold text-slate-800">{title}</h4><p className="text-slate-600 text-sm mt-0.5">{desc}</p></div>
+              </div>
+            ))}
+          </div>
+          <Screenshot desc="Permit creation wizard" />
+        </section>
+        <section id="emp-accounts">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.4 Managing Accounts</h2>
+          <p className="mb-3">Click any account row to open the detail view:</p>
+          <ul className="list-disc pl-6 space-y-1.5 mb-4 text-slate-600">
+            <li><strong>Balance:</strong> Red = amount owed. Add credits for overpayments.</li>
+            <li><strong>Invoices:</strong> View unpaid and past invoices.</li>
+            <li><strong>Activity:</strong> Full audit trail with timestamps.</li>
+            <li><strong>Notes:</strong> Add internal notes.</li>
+            <li><strong>Permits:</strong> All permits under this account.</li>
+          </ul>
+          <Screenshot desc="Account detail view" />
+        </section>
+        <section id="emp-applications">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.5 Reviewing Applications</h2>
+          <p className="mb-3">Dashboard alerts show pending applications. For each:</p>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-center">
+              <strong className="text-emerald-800">Approve</strong>
+              <p className="text-xs text-emerald-600 mt-1">Creates permit, generates invoice</p>
+            </div>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-center">
+              <strong className="text-red-800">Reject</strong>
+              <p className="text-xs text-red-600 mt-1">Declines, notifies customer</p>
+            </div>
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
+              <strong className="text-blue-800">Request Info</strong>
+              <p className="text-xs text-blue-600 mt-1">Asks for more details</p>
+            </div>
+          </div>
+        </section>
+        <section id="emp-payments">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.6 Processing Payments</h2>
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Online (Credit Card, ACH)</h3>
+          <p className="mb-3">Processed automatically when customer pays through invoice link.</p>
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Offline (Cash, Check)</h3>
+          <ol className="list-decimal pl-6 space-y-1.5 mb-4 text-slate-600">
+            <li>Open Invoices tab, find the unpaid invoice.</li>
+            <li>Click to open it.</li>
+            <li>Record the offline payment with amount and method.</li>
+          </ol>
+        </section>
+        <section id="emp-ar">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.7 Managing Unpaid Invoices</h2>
+          <ol className="list-decimal pl-6 space-y-1.5 mb-4 text-slate-600">
+            <li>Go to Invoices tab, click <strong>Show Unpaid Only</strong>.</li>
+            <li>Review each invoice. Click for details and communication history.</li>
+            <li>Send payment reminder via Communications.</li>
+            <li>If unresolved, consider suspending or expiring the permit.</li>
+          </ol>
+        </section>
+        <section id="emp-modify">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.8 Modifying a Permit</h2>
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Changing a Vehicle</h3>
+          <p className="mb-3">Open permit detail. Deactivate old vehicle, add new one.</p>
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Cancelling or Expiring</h3>
+          <p className="mb-3">Use cancel/expire action in the permit detail view.</p>
+        </section>
+        <section id="emp-comms">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.9 Communications</h2>
+          <p className="mb-3">The Communications section provides tools for contacting permit holders from the dashboard.</p>
+          <Screenshot desc="Communications interface" />
+        </section>
+        <section id="emp-tips">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.10 Tips for Employees</h2>
+          <div className="space-y-3">
+            {[["Use Search aggressively", "Search by name, account ID, permit number, plate, or phone."],
+              ["Customize your columns", "Hide what you don't need. Selections are saved."],
+              ["Exports respect filters", "Filter first, then Export for exactly what you need."],
+              ["Check the audit trail first", "Every account and permit has a full activity log."],
+              ["Use notes", "Update account notes after calls. The next person will thank you."]
+            ].map(([t, d]) => (
+              <div key={t} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                <span className="text-slate-400 mt-0.5">&#x2192;</span>
+                <div><strong className="text-slate-800">{t}.</strong> <span className="text-slate-600">{d}</span></div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </>;
+    }
+
+    function AdminGuide() {
+      return <>
+        <section id="admin-locations">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.1 Setting Up a Location</h2>
+          <Table headers={["Setting", "Description"]} rows={[
+            ["Name / Code", "Unique identifier (e.g., 'A0025' or 'Justice Lot')"],
+            ["Address", "Physical address of the facility"],
+            ["Capacity", "Maximum permits allowed. Occupancy shown in red if exceeded."],
+            ["Public Notes", "Visible to Employees during permit creation"],
+            ["Private Notes", "Internal admin-only notes"],
+            ["Tags", "Labels for grouping. Multiple per location."],
+          ]} />
+          <Screenshot desc="Location Settings page" />
+        </section>
+        <section id="admin-rates">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.2 Configuring Rates</h2>
+          <p className="mb-4">Click <strong>+ Create Rate</strong> on the Rates tab.</p>
+          <Table headers={["Setting", "Description"]} rows={[
+            ["Rate Name", "e.g., 'Monthly Unreserved', 'Quarterly VIP Reserved'"],
+            ["Billing Interval", "Monthly, Quarterly, Seasonal, or Yearly"],
+            ["Rate Amount ($)", "Base price per interval"],
+            ["Capacity", "Maximum permits under this rate"],
+            ["Public / Private", "Public = visible on customer portal"],
+            ["Status", "Active or Inactive"],
+          ]} />
+          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Advanced Configuration</h3>
+          <ul className="list-disc pl-6 space-y-1.5 mb-4 text-slate-600">
+            <li><strong>Scheduling:</strong> Start/end dates for seasonal or promotional rates.</li>
+            <li><strong>Add-Ons:</strong> Additional fees (mailing, activation, deposit). One-time or recurring.</li>
+            <li><strong>Sale Pricing:</strong> Temporary rate override for promotions.</li>
+            <li><strong>Vehicle Limits:</strong> Number of vehicles allowed per permit.</li>
+          </ul>
+          <Screenshot desc="Rate creation form" />
+        </section>
+        <section id="admin-share">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.3 Managing Share Links</h2>
+          <Table headers={["Type", "Scope", "Use Case"]} rows={[
+            ["Location Link", "All public rates at a location", "Signage, website, email blasts"],
+            ["Rate Link", "Pre-selects a specific rate", "Targeted invitations"],
+            ["Account Link", "Scoped to corporate account", "Employee distribution"],
+          ]} />
+          <p className="mt-3 mb-3">Each link generates a QR code. The <strong>Discovery Map</strong> shows all locations with available permits on a public interactive map.</p>
+          <Screenshot desc="Share Links with QR codes" />
+        </section>
+        <section id="admin-roles">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.4 User Roles and Permissions</h2>
+          <Table headers={["Capability", "Employee", "Administrator"]} rows={[
+            ["Create permits", "Yes", "Yes"],
+            ["Manage accounts & AR", "Yes", "Yes"],
+            ["Configure rates", "View only", "Yes"],
+            ["Edit location settings", "No", "Yes"],
+            ["Manage users", "No", "Yes"],
+          ]} />
+        </section>
+        <section id="admin-cloning">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.5 Location Cloning</h2>
+          <p className="mb-3">Configure one location fully, then duplicate. Clone copies all settings. Rename and update address. Saves significant time for large rollouts.</p>
+        </section>
+        <section id="admin-tags">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.6 Tags Strategy</h2>
+          <p className="mb-3">Plan tag structure before configuring locations. Tags flow through to reporting and filtering.</p>
+          <ul className="list-disc pl-6 space-y-1.5 text-slate-600">
+            <li><strong>By region:</strong> 'Pacific Northwest', 'Mountain West'</li>
+            <li><strong>By property type:</strong> 'Office', 'Retail', 'University'</li>
+            <li><strong>By management team:</strong> 'Team A', 'Team B'</li>
+            <li><strong>By ownership group:</strong> For multi-owner portfolios</li>
+          </ul>
+        </section>
+      </>;
+    }
+
+    function ReportsGuide() {
+      return <>
+        <section id="tab-exports">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">5.1 Tab-Level Exports</h2>
+          <p className="mb-3">Every tab has an <strong>Export</strong> button. Exports respect active filters and column selections. Download link emailed to you.</p>
+        </section>
+        <section id="reports-section">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">5.2 Reports Section</h2>
+          <p className="mb-3">Pre-built operational and financial reports in the sidebar.</p>
+          <Screenshot desc="Reports dashboard" />
+        </section>
+        <section id="ledger">
+          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">5.3 Ledger Code Exports</h2>
+          <p className="mb-3">Export invoice data with ledger codes for QuickBooks, NetSuite, or internal accounting.</p>
+        </section>
+      </>;
+    }
+
+    function FAQGuide() {
+      const faqs = [
+        { cat: "General", items: [
+          ["What browsers are supported?", "Chrome, Firefox, Safari, Edge (latest versions). Fully web-based."],
+          ["Is there a mobile app?", "No dedicated app. Admin via browser. Customer experience is mobile web."],
+          ["Account vs. Permit Holder?", "Account = billing entity. Permit Holder = individual using the permit."],
+        ]},
+        { cat: "Customers", items: [
+          ["How do I apply for a permit?", "Use a share link, QR code, or discovery map. See Section 2.2."],
+          ["How do I pay?", "Invoice link for card/ACH, or in-person cash/check. See Section 2.4."],
+          ["How do I change my vehicle?", "Contact your parking operator. See Section 2.5."],
+        ]},
+        { cat: "Employees", items: [
+          ["What does 'Pending' mean?", "Permit is missing info or awaiting approval. Open to review."],
+          ["Can I create a permit without a holder?", "Yes. Skip the holder step in the wizard."],
+          ["How do I find an account?", "Search bar on Accounts tab. Name, ID, plate, or phone."],
+        ]},
+        { cat: "Administrators", items: [
+          ["Why is occupancy over 100%?", "Active permits exceed capacity. Check Location Settings."],
+          ["How do I add a new user?", "User management is under the Manage section."],
+        ]},
+      ];
+      return <>{faqs.map(({ cat, items }) => (
+        <div key={cat} className="mt-8">
+          <h3 className="text-lg font-semibold text-slate-700 mb-3">{cat}</h3>
+          <div className="space-y-3">
+            {items.map(([q, a]) => (
+              <details key={q} className="group border border-gray-200 rounded-lg">
+                <summary className="px-4 py-3 cursor-pointer font-medium text-slate-800 hover:bg-gray-50 rounded-lg">{q}</summary>
+                <p className="px-4 pb-3 text-slate-600 text-sm">{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      ))}</>;
+    }
+
+    function App() {
+      const [activeSection, setActiveSection] = useState("getting-started");
+      const [roleFilter, setRoleFilter] = useState("all");
+      const [searchQuery, setSearchQuery] = useState("");
+      const [sidebarOpen, setSidebarOpen] = useState(true);
+
+      const filteredSections = SECTIONS.filter(s => roleFilter === "all" || s.roles.includes(roleFilter));
+
+      const scrollToSection = (id) => {
+        setActiveSection(id);
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+
+      const roleColors = {
+        all: "bg-slate-800 text-white", customer: "bg-emerald-600 text-white",
+        employee: "bg-blue-600 text-white", administrator: "bg-violet-600 text-white",
+      };
+
+      return (
+        <div className="flex h-screen bg-white">
+          <aside className={`${sidebarOpen ? 'w-72' : 'w-0'} flex-shrink-0 bg-slate-900 text-white overflow-y-auto overflow-x-hidden transition-all duration-200`}>
+            <div className="p-5 min-w-[288px]">
+              <div className="mb-6">
+                <h1 className="text-lg font-bold tracking-tight">Oobeo Permits v2</h1>
+                <p className="text-xs text-slate-400 mt-0.5">User Guide</p>
+              </div>
+              <div className="mb-5">
+                <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-semibold">Filter by role</p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[["all","All Roles"],["customer","Customer"],["employee","Employee"],["administrator","Admin"]].map(([key,label]) => (
+                    <button key={key} onClick={() => setRoleFilter(key)}
+                      className={`px-2 py-1.5 rounded text-xs font-medium transition-colors ${roleFilter === key ? roleColors[key] : 'bg-slate-800 text-slate-400 hover:text-white'}`}>{label}</button>
+                  ))}
+                </div>
+              </div>
+              <nav className="space-y-1">
+                {filteredSections.map(section => (
+                  <div key={section.id}>
+                    <button onClick={() => { setActiveSection(section.id); scrollToSection(section.id); }}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold transition-colors ${activeSection === section.id || section.children?.some(c => c.id === activeSection) ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wider block">{section.part}</span>
+                      {section.title}
+                    </button>
+                    {section.children?.length > 0 && (activeSection === section.id || section.children?.some(c => c.id === activeSection)) && (
+                      <div className="ml-3 mt-1 space-y-0.5 border-l border-slate-700 pl-3">
+                        {section.children.map(child => (
+                          <button key={child.id} onClick={() => { setActiveSection(child.id); scrollToSection(child.id); }}
+                            className={`w-full text-left px-2 py-1 rounded text-xs transition-colors ${activeSection === child.id ? 'text-white font-medium bg-slate-700' : 'text-slate-400 hover:text-white'}`}>{child.title}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </nav>
+            </div>
+          </aside>
+
+          <main className="flex-1 overflow-y-auto">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200 px-6 py-3 flex items-center gap-4">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-gray-100">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+              </button>
+              <div className="relative flex-1 max-w-md">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" placeholder="Search documentation..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
+              </div>
+              <Tag color="gray">Draft v1.0</Tag>
+            </div>
+
+            <div className="max-w-3xl mx-auto px-8 py-8">
+              {(roleFilter === "all" || filteredSections.some(s => s.id === "getting-started")) && (
+                <div id="getting-started">
+                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 1</span>
+                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Getting Started</h1>
+                  <RoleBadges roles={["customer","employee","administrator"]} />
+                  <GettingStarted />
+                </div>
+              )}
+              {(roleFilter === "all" || roleFilter === "customer") && (
+                <div id="customer-guide" className="mt-16 pt-8 border-t border-gray-200">
+                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 2</span>
+                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Customer Guide</h1>
+                  <RoleBadges roles={["customer"]} />
+                  <p className="text-slate-600 mb-4 italic">For parkers who need to apply for, pay for, and manage a parking permit.</p>
+                  <CustomerGuide />
+                </div>
+              )}
+              {(roleFilter === "all" || roleFilter === "employee") && (
+                <div id="employee-guide" className="mt-16 pt-8 border-t border-gray-200">
+                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 3</span>
+                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Employee Guide</h1>
+                  <RoleBadges roles={["employee"]} />
+                  <p className="text-slate-600 mb-4 italic">For property managers, customer service reps, and front desk staff.</p>
+                  <EmployeeGuide />
+                </div>
+              )}
+              {(roleFilter === "all" || roleFilter === "administrator") && (
+                <div id="admin-guide" className="mt-16 pt-8 border-t border-gray-200">
+                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 4</span>
+                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Administrator Guide</h1>
+                  <RoleBadges roles={["administrator"]} />
+                  <p className="text-slate-600 mb-4 italic">For operations directors, IT admins, and system owners.</p>
+                  <AdminGuide />
+                </div>
+              )}
+              {(roleFilter === "all" || roleFilter === "employee" || roleFilter === "administrator") && (
+                <div id="reports" className="mt-16 pt-8 border-t border-gray-200">
+                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 5</span>
+                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Reports and Exports</h1>
+                  <RoleBadges roles={["employee","administrator"]} />
+                  <ReportsGuide />
+                </div>
+              )}
+              <div id="faq" className="mt-16 pt-8 border-t border-gray-200">
+                <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Appendix</span>
+                <h1 className="text-3xl font-bold text-slate-900 mb-2">Frequently Asked Questions</h1>
+                <RoleBadges roles={["customer","employee","administrator"]} />
+                <FAQGuide />
+              </div>
+              <div className="mt-16 mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 text-center text-sm text-gray-400">
+                Oobeo Permits v2 User Guide &middot; Draft v1.0 &middot; Platform: Oobeo
+              </div>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>
