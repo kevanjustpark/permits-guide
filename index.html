@@ -1,604 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Oobeo Permits v2 | User Guide</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    body { margin: 0; font-family: 'Source Sans 3', 'Segoe UI', sans-serif; }
-    details summary::-webkit-details-marker { display: none; }
-    details summary { list-style: none; }
-    details summary::before { content: '\25B6'; display: inline-block; margin-right: 8px; font-size: 10px; transition: transform 0.2s; color: #94a3b8; }
-    details[open] summary::before { transform: rotate(90deg); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oobeo Permits v2 | User Guide</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Source Sans 3','Segoe UI',sans-serif}
+details summary::-webkit-details-marker{display:none}
+details summary{list-style:none}
+details summary::before{content:'\25B6';display:inline-block;margin-right:8px;font-size:10px;transition:transform .2s;color:#94a3b8}
+details[open] summary::before{transform:rotate(90deg)}
+.screenshot{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.screenshot img{width:100%;display:block}
+.screenshot .caption{padding:8px 12px;background:#f8fafc;font-size:13px;color:#64748b;border-top:1px solid #e2e8f0}
+.nav-item.active{background:#334155;color:#fff}
+.section-anchor{scroll-margin-top:64px}
+table{border-collapse:collapse;width:100%}
+th{background:#1e293b;color:#fff;padding:10px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+td{padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:14px}
+tr:nth-child(even) td{background:#f8fafc}
+.role-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid}
+.role-customer{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.role-employee{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.role-admin{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+.callout{padding:14px 16px;border-radius:8px;margin:12px 0;font-size:14px}
+.callout-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.callout-warn{background:#fef3c7;border:1px solid #fde68a;color:#92400e}
+.callout-tip{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.rbtn{transition:background .15s,color .15s}
+.rbtn:hover{background:#334155 !important;color:#fff !important}
+.step-num{width:32px;height:32px;border-radius:50%;background:#1e293b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useRef } = React;
+<div id="app" style="display:flex;height:100vh">
 
-    const SECTIONS = [
-      { id: "getting-started", part: "Part 1", title: "Getting Started", roles: ["customer", "employee", "administrator"],
-        children: [
-          { id: "what-is-permits", title: "1.1 What Is Oobeo Permits?" },
-          { id: "access", title: "1.2 How to Access the System" },
-          { id: "concepts", title: "1.3 Key Concepts" },
-        ],
-      },
-      { id: "customer-guide", part: "Part 2", title: "Customer Guide", roles: ["customer"],
-        children: [
-          { id: "finding-permits", title: "2.1 Finding Available Permits" },
-          { id: "applying", title: "2.2 Applying for a Permit" },
-          { id: "app-status", title: "2.3 Application Status" },
-          { id: "paying", title: "2.4 Paying for Your Permit" },
-          { id: "managing-permit", title: "2.5 Managing Your Permit" },
-          { id: "cust-invoices", title: "2.6 Invoices and Billing" },
-          { id: "cust-help", title: "2.7 Getting Help" },
-        ],
-      },
-      { id: "employee-guide", part: "Part 3", title: "Employee Guide", roles: ["employee"],
-        children: [
-          { id: "emp-dashboard", title: "3.1 Dashboard Overview" },
-          { id: "emp-tabs", title: "3.2 Navigating the Tabs" },
-          { id: "emp-create", title: "3.3 Creating a Permit" },
-          { id: "emp-accounts", title: "3.4 Managing Accounts" },
-          { id: "emp-applications", title: "3.5 Reviewing Applications" },
-          { id: "emp-payments", title: "3.6 Processing Payments" },
-          { id: "emp-ar", title: "3.7 Managing Unpaid Invoices" },
-          { id: "emp-modify", title: "3.8 Modifying a Permit" },
-          { id: "emp-comms", title: "3.9 Communications" },
-          { id: "emp-tips", title: "3.10 Tips for Employees" },
-        ],
-      },
-      { id: "admin-guide", part: "Part 4", title: "Administrator Guide", roles: ["administrator"],
-        children: [
-          { id: "admin-locations", title: "4.1 Setting Up a Location" },
-          { id: "admin-rates", title: "4.2 Configuring Rates" },
-          { id: "admin-share", title: "4.3 Managing Share Links" },
-          { id: "admin-roles", title: "4.4 User Roles and Permissions" },
-          { id: "admin-cloning", title: "4.5 Location Cloning" },
-          { id: "admin-tags", title: "4.6 Tags Strategy" },
-        ],
-      },
-      { id: "reports", part: "Part 5", title: "Reports and Exports", roles: ["employee", "administrator"],
-        children: [
-          { id: "tab-exports", title: "5.1 Tab-Level Exports" },
-          { id: "reports-section", title: "5.2 Reports Section" },
-          { id: "ledger", title: "5.3 Ledger Code Exports" },
-        ],
-      },
-      { id: "faq", part: "Appendix", title: "FAQ", roles: ["customer", "employee", "administrator"], children: [] },
-    ];
+<!-- SIDEBAR -->
+<aside id="sidebar" style="width:280px;flex-shrink:0;background:#0f172a;color:#fff;overflow-y:auto">
+<div style="padding:20px">
+<img src="images/justpark-logo.png" alt="JustPark" style="height:28px;margin-bottom:12px">
+<h1 style="font-size:18px;font-weight:700;letter-spacing:-.3px;margin:0">Oobeo Permits v2</h1>
+<p style="font-size:12px;color:#64748b;margin:4px 0 0">User Guide</p>
 
-    const Screenshot = ({ desc }) => (
-      <div className="my-4 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-        <svg className="mx-auto mb-2" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <p className="text-sm text-gray-400 font-medium">{desc}</p>
-      </div>
-    );
+<div style="margin:20px 0">
+<p style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#475569;font-weight:600;margin-bottom:8px">Filter by role</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+<button onclick="setRole('all')" class="rbtn" data-role="all" style="padding:6px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:#1e293b;color:#94a3b8">All Roles</button>
+<button onclick="setRole('customer')" class="rbtn" data-role="customer" style="padding:6px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:#1e293b;color:#94a3b8">Customer</button>
+<button onclick="setRole('employee')" class="rbtn" data-role="employee" style="padding:6px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:#1e293b;color:#94a3b8">Employee</button>
+<button onclick="setRole('admin')" class="rbtn" data-role="admin" style="padding:6px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:#1e293b;color:#94a3b8">Admin</button>
+</div>
+</div>
 
-    const Table = ({ headers, rows }) => (
-      <div className="my-4 overflow-x-auto rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead><tr className="bg-slate-800 text-white">
-            {headers.map((h, i) => <th key={i} className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider">{h}</th>)}
-          </tr></thead>
-          <tbody>{rows.map((row, i) => (
-            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-              {row.map((cell, j) => <td key={j} className="px-4 py-3 border-t border-gray-100">{cell}</td>)}
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-    );
+<nav id="nav" style="display:flex;flex-direction:column;gap:2px">
+<!-- Generated by JS -->
+</nav>
+</div>
+</aside>
 
-    const Tag = ({ children, color = "blue" }) => {
-      const colors = { blue: "bg-blue-50 text-blue-700 border-blue-200", green: "bg-emerald-50 text-emerald-700 border-emerald-200", purple: "bg-violet-50 text-violet-700 border-violet-200", gray: "bg-gray-100 text-gray-600 border-gray-200" };
-      return <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${colors[color]}`}>{children}</span>;
-    };
+<!-- MAIN -->
+<main id="main" style="flex:1;overflow-y:auto">
+<div style="position:sticky;top:0;z-index:10;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;padding:12px 24px;display:flex;align-items:center;gap:16px">
+<button onclick="document.getElementById('sidebar').style.display=document.getElementById('sidebar').style.display==='none'?'block':'none'" style="padding:6px;border:none;background:none;cursor:pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+</button>
+<span style="background:#f1f5f9;color:#64748b;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500;border:1px solid #e2e8f0">Draft v2.0 — With Screenshots</span>
+</div>
 
-    const RoleBadges = ({ roles }) => {
-      const c = { customer: "green", employee: "blue", administrator: "purple" };
-      return <div className="flex gap-1.5 mb-3">{roles.map(r => <Tag key={r} color={c[r]}>{r}</Tag>)}</div>;
-    };
+<div style="max-width:820px;margin:0 auto;padding:32px">
 
-    function GettingStarted() {
-      return <>
-        <section id="what-is-permits">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">1.1 What Is Oobeo Permits?</h2>
-          <p className="mb-3">Oobeo Permits v2 is a web-based permit management system for parking. It lets operators create, sell, and manage parking permits across one or many locations. It handles applications, billing, payments, vehicle tracking, and reporting in one platform.</p>
-          <p className="mb-3">Permits v2 is part of the broader Oobeo platform, which also includes Valet, Self Parking, Attendant Payments, and Event Parking. All products share a common database, so driver records, payment data, and reporting are consolidated.</p>
-          <p className="mb-4">The system is designed around three user types:</p>
-          <Table headers={["Role", "Who They Are", "What They Do"]} rows={[
-            [<strong>Customer</strong>, "Parkers who need a permit", "Browse available permits, apply, pay, manage vehicles, view invoices"],
-            [<strong>Employee</strong>, "Property managers, CS reps, front desk staff", "Create permits, manage accounts, process payments, review applications"],
-            [<strong>Administrator</strong>, "Operations directors, IT admins, system owners", "Set up locations, configure rates, manage users, build share links"],
-          ]} />
-        </section>
-        <section id="access">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">1.2 How to Access the System</h2>
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Employees and Administrators</h3>
-          <p className="mb-3">Access the admin dashboard via your web browser at: <code className="bg-gray-100 px-2 py-0.5 rounded text-sm font-mono">vale.to/controlpanel/permits</code></p>
-          <p className="mb-3">Use Chrome, Firefox, Safari, or Edge (latest versions). No software installation required.</p>
-          <Screenshot desc="Admin login screen" />
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Customers</h3>
-          <p className="mb-3">Customers do not log into the admin dashboard. They interact through:</p>
-          <ul className="list-disc pl-6 space-y-1.5 mb-4 text-slate-600">
-            <li><strong>Share links</strong> sent by email, text, or posted on signage</li>
-            <li><strong>QR codes</strong> printed on signage, in lobbies, or onboarding materials</li>
-            <li><strong>Discovery map</strong>, a public-facing map showing locations with available permits</li>
-            <li><strong>Direct links</strong> from invoices for making payments</li>
-          </ul>
-          <p className="mb-3">No app download required. The entire customer experience is mobile web.</p>
-        </section>
-        <section id="concepts">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">1.3 Key Concepts</h2>
-          <div className="space-y-3">
-            {[["Account", "The billing entity. Can be an individual or an organization. Gets charged for permits."],
-              ["Permit Holder", "The individual person using the permit. May be the same as Account owner or different."],
-              ["Rate", "A pricing configuration defining cost, billing interval, capacity, and availability."],
-              ["Location", "A physical parking facility. Each has its own rates, capacity, and settings."],
-              ["Share Link", "A URL (with QR code) giving customers access to apply. Can be scoped to location, rate, or account."],
-              ["Tags", "Labels on locations for grouping and filtering."]
-            ].map(([term, def]) => (
-              <div key={term} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                <span className="font-semibold text-slate-800 whitespace-nowrap min-w-[120px]">{term}</span>
-                <span className="text-slate-600">{def}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </>;
+<!-- ============================================================ -->
+<!-- PART 1: GETTING STARTED -->
+<!-- ============================================================ -->
+<div id="getting-started" class="section-anchor" data-roles="customer employee admin">
+<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;font-weight:600">Part 1</span>
+<h1 style="font-size:32px;font-weight:700;color:#0f172a;margin:4px 0 8px">Getting Started</h1>
+<div><span class="role-badge role-customer">customer</span> <span class="role-badge role-employee">employee</span> <span class="role-badge role-admin">administrator</span></div>
+
+<h2 id="what-is" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">1.1 What Is Oobeo Permits?</h2>
+<p>Oobeo Permits v2 is a web-based permit management system for parking. It lets operators create, sell, and manage parking permits across one or many locations. It handles applications, billing, payments, vehicle tracking, and reporting in one platform.</p>
+<p>Permits v2 runs on the Oobeo platform alongside Valet, Self Parking, Attendant Payments, and Event Parking. All products share a common database, so driver records, payment data, and reporting are consolidated.</p>
+<p>The system is designed around three user types:</p>
+<table>
+<tr><th>Role</th><th>Who They Are</th><th>What They Do</th></tr>
+<tr><td><strong>Customer</strong></td><td>Parkers who need a permit</td><td>Find permits, apply, pay, manage vehicles, view invoices</td></tr>
+<tr><td><strong>Employee</strong></td><td>Property managers, CS reps, front desk</td><td>Create permits, manage accounts, process payments, review applications</td></tr>
+<tr><td><strong>Administrator</strong></td><td>Operations directors, IT admins</td><td>Set up locations, configure rates, manage users, build share links</td></tr>
+</table>
+
+<h2 id="access" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">1.2 How to Access the System</h2>
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Employees and Administrators</h3>
+<p>Access the Permits dashboard at <code style="background:#f1f5f9;padding:2px 8px;border-radius:4px;font-size:13px">vale.to/controlpanel/permits</code>. Use Chrome, Firefox, Safari, or Edge. No installation required.</p>
+<p>The Permits v2 application (React frontend) has its own sidebar navigation separate from the legacy Oobeo dashboard. Both are accessible, and you can switch between them using the Quick Actions panel in the top-right corner.</p>
+<div class="screenshot"><img src="images/02-accounts-tab.png" alt="Permits v2 dashboard"><div class="caption">The Permits v2 dashboard showing the Accounts tab, summary bar, and sidebar navigation</div></div>
+<div class="screenshot"><img src="images/26-quick-actions.png" alt="Quick Actions panel"><div class="caption">Quick Actions panel: switch between Permits, Dashboard (legacy), and EnforcePlus. Download links for Oobeo and EnforcePlus mobile apps.</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Customers</h3>
+<p>Customers do not use the admin dashboard. They interact through:</p>
+<ul style="padding-left:24px">
+<li><strong>Share links</strong> sent by email, text, or posted on signage</li>
+<li><strong>QR codes</strong> on signage, in lobbies, or onboarding materials</li>
+<li><strong>Parking Finder</strong>, a public search page showing locations with available permits</li>
+<li><strong>Account Management Portal</strong>, a self-serve page for payments, receipts, and permit management</li>
+</ul>
+<p>No app download required. The entire customer experience is mobile web.</p>
+<div class="screenshot"><img src="images/40-customer-finder.png" alt="Parking Finder"><div class="caption">The Parking Finder: customers search for available permits by location</div></div>
+
+<h2 id="concepts" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">1.3 Key Concepts</h2>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;gap:12px;padding:12px;background:#f8fafc;border-radius:8px"><span style="font-weight:600;color:#1e293b;min-width:130px">Account</span><span style="color:#475569">The billing entity. An individual or organization. Gets charged for permits. Has its own portal link.</span></div>
+<div style="display:flex;gap:12px;padding:12px;background:#f8fafc;border-radius:8px"><span style="font-weight:600;color:#1e293b;min-width:130px">Permit Holder</span><span style="color:#475569">The person using the permit. Same as Account owner for personal permits, or different for corporate accounts.</span></div>
+<div style="display:flex;gap:12px;padding:12px;background:#f8fafc;border-radius:8px"><span style="font-weight:600;color:#1e293b;min-width:130px">Rate</span><span style="color:#475569">A pricing configuration: cost, interval, capacity, options, and requirements. Created via a 4-step wizard.</span></div>
+<div style="display:flex;gap:12px;padding:12px;background:#f8fafc;border-radius:8px"><span style="font-weight:600;color:#1e293b;min-width:130px">Location</span><span style="color:#475569">A physical parking facility. Each has its own rates, capacity, and settings.</span></div>
+<div style="display:flex;gap:12px;padding:12px;background:#f8fafc;border-radius:8px"><span style="font-weight:600;color:#1e293b;min-width:130px">Share Link</span><span style="color:#475569">A URL (with optional QR code) for customers to apply. Can be scoped to location, rate, or account.</span></div>
+<div style="display:flex;gap:12px;padding:12px;background:#f8fafc;border-radius:8px"><span style="font-weight:600;color:#1e293b;min-width:130px">Management Portal</span><span style="color:#475569">A customer-facing self-serve page for each account and permit. Accessed via unique link.</span></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 2: CUSTOMER GUIDE -->
+<!-- ============================================================ -->
+<div id="customer-guide" class="section-anchor" data-roles="customer" style="margin-top:64px;padding-top:32px;border-top:1px solid #e2e8f0">
+<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;font-weight:600">Part 2</span>
+<h1 style="font-size:32px;font-weight:700;color:#0f172a;margin:4px 0 8px">Customer Guide</h1>
+<div><span class="role-badge role-customer">customer</span></div>
+<p style="color:#64748b;font-style:italic">For parkers who need to apply for, pay for, and manage a parking permit.</p>
+
+<h2 id="finding" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">2.1 Finding Available Permits</h2>
+<div style="display:grid;gap:12px;margin:16px 0">
+<div style="padding:16px;border:1px solid #e2e8f0;border-radius:8px"><h4 style="font-weight:600;margin:0 0 4px">Parking Finder</h4><p style="color:#64748b;font-size:14px;margin:0">Your operator may provide a search page where you can browse locations and available permits. Enter a location name or address to find parking near you.</p></div>
+<div style="padding:16px;border:1px solid #e2e8f0;border-radius:8px"><h4 style="font-weight:600;margin:0 0 4px">Share Link or QR Code</h4><p style="color:#64748b;font-size:14px;margin:0">Links sent by email/text or QR codes on signage open the application form directly, often pre-scoped to a specific location or rate.</p></div>
+<div style="padding:16px;border:1px solid #e2e8f0;border-radius:8px"><h4 style="font-weight:600;margin:0 0 4px">Account Portal</h4><p style="color:#64748b;font-size:14px;margin:0">If you already have an account, your portal has a "Find Permits" button to search for additional permits at your operator's locations.</p></div>
+</div>
+<div class="screenshot"><img src="images/40-customer-finder.png" alt="Parking Finder"><div class="caption">The Parking Finder page: search by location to find and apply for available permits</div></div>
+
+<h2 id="applying" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">2.2 Applying for a Permit</h2>
+<p>Once you reach the application portal:</p>
+<ol style="padding-left:24px">
+<li>Select a location (if not pre-selected).</li>
+<li>Choose a rate. Each shows the price, billing frequency, and any notes from the operator.</li>
+<li>Enter your information: name, email, phone, address.</li>
+<li>Add your vehicle(s): license plate, color, make, type.</li>
+<li>Review and submit.</li>
+</ol>
+<p>After submitting, your application goes to the operator for review. Some rates have auto-approval enabled, meaning your permit is activated immediately.</p>
+
+<h2 id="portal" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">2.3 Your Account Portal</h2>
+<p>Every account has a self-serve portal where you can manage your permits, make payments, and view receipts. Access it via the link in your confirmation email or invoice.</p>
+<div class="screenshot"><img src="images/36-customer-portal.png" alt="Customer Account Portal"><div class="caption">The Account Management Portal: view balance, make payments, manage permits, and find additional parking</div></div>
+<p>Your portal shows:</p>
+<ul style="padding-left:24px">
+<li><strong>Your account info</strong> and email</li>
+<li><strong>Permit count and location</strong></li>
+<li><strong>Balance Due</strong> with status alerts (e.g., "Suspended - pay now to avoid action")</li>
+<li>Three action buttons: <strong>View Receipts</strong>, <strong>Manage Permits</strong>, <strong>Payment Methods</strong></li>
+<li>A <strong>Pay Now</strong> button for immediate payment</li>
+<li>A <strong>Find Permits</strong> link to apply for additional permits</li>
+</ul>
+
+<h2 id="paying" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">2.4 Paying for Your Permit</h2>
+<p>When you have a balance due, click <strong>Pay Now</strong> from your portal or from the link in your invoice email. The payment page shows your invoice details and total due.</p>
+<div class="screenshot"><img src="images/41-customer-payment.png" alt="Payment page"><div class="caption">The payment page: review invoice details and click Pay now to complete your payment</div></div>
+<table>
+<tr><th>Method</th><th>How It Works</th></tr>
+<tr><td>Credit Card</td><td>Pay online through your portal or invoice link.</td></tr>
+<tr><td>ACH (Bank Transfer)</td><td>Pay online via bank transfer.</td></tr>
+<tr><td>Cash</td><td>Pay in person. The operator records payment in the system.</td></tr>
+<tr><td>Check</td><td>Mail to the address on your invoice. Recorded by operator when received.</td></tr>
+</table>
+<p>Use the <strong>Payment Methods</strong> button in your portal to manage saved payment methods.</p>
+
+<h2 id="cust-manage" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">2.5 Managing Your Permit</h2>
+<p>From your portal, click <strong>Manage Permits</strong> to view your active permits. To change your vehicle or update your information, contact your parking operator. To cancel, contact the operator. Cancellation policies vary.</p>
+
+<h2 id="cust-help" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">2.6 Getting Help</h2>
+<div class="callout callout-info">For questions about your permit, billing, or changes, contact your parking operator. Their contact information is available via the <strong>Contact</strong> link on the Parking Finder page and in your invoice emails.</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 3: EMPLOYEE GUIDE -->
+<!-- ============================================================ -->
+<div id="employee-guide" class="section-anchor" data-roles="employee" style="margin-top:64px;padding-top:32px;border-top:1px solid #e2e8f0">
+<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;font-weight:600">Part 3</span>
+<h1 style="font-size:32px;font-weight:700;color:#0f172a;margin:4px 0 8px">Employee Guide</h1>
+<div><span class="role-badge role-employee">employee</span></div>
+<p style="color:#64748b;font-style:italic">For property managers, customer service reps, and front desk staff.</p>
+
+<h2 id="emp-nav" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.1 Dashboard and Navigation</h2>
+<p>The Permits v2 sidebar has six sections: Permits (the main workspace), Manage, Reports, Communications, Location Settings, and Share Links. Within Permits, five tabs give you access to Accounts, Permits, Rates, Invoices, and Locations.</p>
+<p>A location filter at the top scopes all data. When active, a summary bar shows Total Permits, Available, Occupancy %, pending Applications, and Wait List.</p>
+<div class="screenshot"><img src="images/02-accounts-tab.png" alt="Navigation"><div class="caption">The Permits v2 interface: sidebar navigation, top tab bar, location filter, and summary bar</div></div>
+<p>Every tab supports <strong>Search</strong>, customizable <strong>Columns</strong>, <strong>Filters</strong>, and <strong>Export</strong>. Your column and filter selections are saved.</p>
+
+<h2 id="emp-tabs" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.2 The Five Tabs</h2>
+<table>
+<tr><th>Tab</th><th>What It Shows</th><th>When You Use It</th></tr>
+<tr><td>Accounts</td><td>All accounts: name, contact, permit count, balance (red = outstanding)</td><td>Looking up a customer, checking balances</td></tr>
+<tr><td>Permits</td><td>All permits: ID, location, account, holder, expiration, status, plates</td><td>Checking status, finding a specific permit</td></tr>
+<tr><td>Rates</td><td>Rates per location: type, remaining, occupancy, capacity, price, interval</td><td>Checking availability (rates configured by Admins)</td></tr>
+<tr><td>Invoices</td><td>Billing records: invoice #, date, period, account, amount, paid/unpaid</td><td>Processing payments, AR follow-up</td></tr>
+<tr><td>Locations</td><td>All locations: name, address, occupancy, capacity, rate count</td><td>Finding a location, checking capacity</td></tr>
+</table>
+<div class="screenshot"><img src="images/04-permits-tab.png" alt="Permits tab"><div class="caption">Permits tab showing Active and Expired permits across multiple locations</div></div>
+<div class="screenshot"><img src="images/16-invoices-tab-unpaid.png" alt="Invoices tab"><div class="caption">Invoices tab with Show Unpaid Only filter. Click any invoice to open the detail view.</div></div>
+
+<h2 id="emp-create" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.3 Creating a Permit</h2>
+<p>Click <strong>+ Add Permit</strong> in the top-right corner to launch the wizard.</p>
+<div class="screenshot"><img src="images/37-add-permit-step1.png" alt="Add Permit Step 1"><div class="caption">Step 1: Choose Existing account (recommended) or create a New account</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Existing Account</h3>
+<p>Search by name or email. Recent accounts appear automatically. Click the account, then "Continue to permit details."</p>
+<div class="screenshot"><img src="images/38-add-permit-existing.png" alt="Select existing account"><div class="caption">Search for an existing account by name or email</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">New Account</h3>
+<p>A 3-step wizard creates the account: Basic Info (name, phone, email, optional billing email), Addresses (optional), and Settings. The account is created, then you proceed to permit details.</p>
+<div class="screenshot"><img src="images/39-add-permit-newaccount.png" alt="Create new account"><div class="caption">New account wizard: enter account name, phone, email, and optional billing email</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Permit Details</h3>
+<p>After selecting or creating an account, configure the permit: Location, Rate (dropdown), Start Date, Space Number (optional), Access ID (optional), and Cancel on renewal checkbox. Expand the Permit Holder and Vehicles sections or skip them.</p>
+<div class="screenshot"><img src="images/09-permit-edit.png" alt="Permit details form"><div class="caption">The permit details form with collapsible Permit Holder and Vehicles sections</div></div>
+
+<h2 id="emp-accounts" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.4 Managing Accounts</h2>
+<p>Click any account row to open the detail view. The left sidebar has five sections:</p>
+<div class="screenshot"><img src="images/03-account-detail-overview.png" alt="Account detail"><div class="caption">Account Overview: outstanding balance (151 days past due), Take Payment, Add/Subtract Credit, unpaid invoices, and account attributes</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Overview</h3>
+<p>Shows account name, contact info, attributes (e.g., "No late fee", "1 Vehicles per permit"), outstanding balance with days past due, Take Payment and Archive Account buttons, credit balance with Add/Subtract, and unpaid invoices with amounts and periods.</p>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Activity</h3>
+<p>Full audit trail: every invoice generated, email sent, payment recorded, and change made. Filterable by activity type with a Refresh button.</p>
+<div class="screenshot"><img src="images/28-account-activity.png" alt="Account activity"><div class="caption">Activity Log tracking New Invoice and Email Sent events with dates, times, and amounts</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Permits</h3>
+<p>All permits under this account with location, rate, count, frequency, and total. Edit Quantity inline or click + Add Permit to create a new one from this account.</p>
+<div class="screenshot"><img src="images/30-account-permits.png" alt="Account permits"><div class="caption">Permits tab on an account: edit quantity inline or add new permits</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Management Portal</h3>
+<p>A unique link (vale.to/checkout/account/...) to the customer-facing portal for this account. Copy and send to the customer so they can self-serve payments, view receipts, and manage permits.</p>
+<div class="screenshot"><img src="images/31-account-portal.png" alt="Account portal link"><div class="caption">Management Portal with copyable link and Open Portal button</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Notes</h3>
+<p>Free-text notes with attachments. Use for internal tracking (e.g., "Called about late payment 3/15, promised to pay by Friday").</p>
+<div class="screenshot"><img src="images/32-account-notes.png" alt="Account notes"><div class="caption">Notes with text input, attachment support, and Save button</div></div>
+
+<h2 id="emp-applications" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.5 Reviewing Applications</h2>
+<p>When a customer submits an application through a share link, the summary bar shows the count under "Applications" with a "View" link. The legacy dashboard also shows a yellow alert banner.</p>
+<div class="screenshot"><img src="images/01-dashboard-old.png" alt="Dashboard with alert"><div class="caption">Dashboard alert: "You have 4 pending permit applications - Review Pending Permits"</div></div>
+<p>For each application, you can <strong>Approve</strong> (creates the permit and first invoice), <strong>Reject</strong> (notifies the customer), or <strong>Request more information</strong>.</p>
+<div class="callout callout-tip">Rates with "Auto Approve Applicants" enabled (configured in the rate wizard, Step 3) skip the review queue and activate permits immediately.</div>
+
+<h2 id="emp-payments" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.6 Processing Payments and Invoices</h2>
+<p>Online payments (credit card, ACH) are processed automatically when the customer pays through their portal. For offline payments (cash, check), open the invoice and record the payment.</p>
+<div class="screenshot"><img src="images/19-invoice-detail-fees.png" alt="Invoice detail"><div class="caption">Invoice detail showing Parking Fees and Convenience Fee line items, with PDF, Resend, Recalculate, Refund, and Edit buttons</div></div>
+<p>Invoice actions:</p>
+<ul style="padding-left:24px">
+<li><strong>PDF:</strong> Download a PDF of the invoice</li>
+<li><strong>Resend:</strong> Re-send the invoice to the customer</li>
+<li><strong>Recalculate:</strong> Recalculate the invoice (e.g., after a rate change)</li>
+<li><strong>Refund:</strong> Process a refund on a paid invoice</li>
+<li><strong>Edit:</strong> Modify the invoice details</li>
+</ul>
+
+<h2 id="emp-ar" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.7 Managing Unpaid Invoices</h2>
+<ol style="padding-left:24px">
+<li>Go to Invoices tab, click <strong>Show Unpaid Only</strong>.</li>
+<li>Review each invoice. Click for details and communication history.</li>
+<li>Use <strong>Resend</strong> to re-send the invoice or <strong>Communications</strong> to send a payment reminder.</li>
+<li>If unresolved, open the permit and use <strong>Suspend Permit</strong> or one of the cancellation options.</li>
+</ol>
+
+<h2 id="emp-permits" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.8 Managing Existing Permits</h2>
+<p>Click any permit row to open the detail view.</p>
+<div class="screenshot"><img src="images/05-permit-detail.png" alt="Permit detail"><div class="caption">Permit detail showing holder info, permit details (rate, fee, dates), and four action buttons</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Permit Actions</h3>
+<table>
+<tr><th>Action</th><th>What It Does</th></tr>
+<tr><td>Suspend Permit</td><td>Temporarily suspends the permit. Can be reactivated.</td></tr>
+<tr><td>Cancel at Renewal</td><td>Permit stays active until the current billing period ends, then does not renew.</td></tr>
+<tr><td>Cancel on Date</td><td>Permit cancels on a specific future date you choose.</td></tr>
+<tr><td>Cancel Immediately</td><td>Permit is cancelled right now.</td></tr>
+</table>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Vehicles</h3>
+<p>View assigned vehicles with license plate, color, make, and type. The permit shows how many vehicles are allowed (set by the rate).</p>
+<div class="screenshot"><img src="images/06-permit-vehicles.png" alt="Permit vehicles"><div class="caption">"This permit allows 1 vehicle" with the assigned vehicle details</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Editing a Permit</h3>
+<p>Click <strong>Edit</strong> in the left sidebar to change the location, rate, start date, space number, access ID, or cancel-on-renewal setting. Expand Permit Holder and Vehicles sections to update those as well.</p>
+
+<h2 id="emp-comms" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.9 Communications</h2>
+<p>Send messages to account holders or permit holders via email or SMS. A two-step wizard: select recipients, then compose your message.</p>
+<div class="screenshot"><img src="images/24-comms-step1.png" alt="Communications Step 1"><div class="caption">Step 1: Select recipients by Account Holders or Permit Holders. Filter by tags, search, or Select All.</div></div>
+<div class="screenshot"><img src="images/25-comms-step2.png" alt="Communications Step 2"><div class="caption">Step 2: Choose Email or SMS, compose your message, and send</div></div>
+
+<h2 id="emp-tips" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">3.10 Tips for Employees</h2>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;gap:10px;padding:12px;background:#f8fafc;border-radius:8px"><span style="color:#94a3b8">&#8594;</span><div><strong>Use Search aggressively.</strong> <span style="color:#64748b">Name, account ID, permit number, plate, or phone across most tabs.</span></div></div>
+<div style="display:flex;gap:10px;padding:12px;background:#f8fafc;border-radius:8px"><span style="color:#94a3b8">&#8594;</span><div><strong>Send the Management Portal link.</strong> <span style="color:#64748b">Copy the portal link from the account detail and send it to customers. Let them self-serve payments and receipts.</span></div></div>
+<div style="display:flex;gap:10px;padding:12px;background:#f8fafc;border-radius:8px"><span style="color:#94a3b8">&#8594;</span><div><strong>Check the audit trail first.</strong> <span style="color:#64748b">Every account and permit has a full Activity Log. Check before escalating.</span></div></div>
+<div style="display:flex;gap:10px;padding:12px;background:#f8fafc;border-radius:8px"><span style="color:#94a3b8">&#8594;</span><div><strong>Use notes.</strong> <span style="color:#64748b">When you call a customer, update the account notes. The next person will thank you.</span></div></div>
+<div style="display:flex;gap:10px;padding:12px;background:#f8fafc;border-radius:8px"><span style="color:#94a3b8">&#8594;</span><div><strong>Exports respect filters.</strong> <span style="color:#64748b">Set up a filtered view, then Export. You get exactly what's on screen.</span></div></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 4: ADMINISTRATOR GUIDE -->
+<!-- ============================================================ -->
+<div id="admin-guide" class="section-anchor" data-roles="admin" style="margin-top:64px;padding-top:32px;border-top:1px solid #e2e8f0">
+<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;font-weight:600">Part 4</span>
+<h1 style="font-size:32px;font-weight:700;color:#0f172a;margin:4px 0 8px">Administrator Guide</h1>
+<div><span class="role-badge role-admin">administrator</span></div>
+<p style="color:#64748b;font-style:italic">For operations directors, IT admins, and system owners.</p>
+
+<h2 id="admin-locations" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">4.1 Setting Up Locations</h2>
+<p>Locations are managed in Location Settings. Each location defines which parking types are enabled (Valet, Self Parking with event parking, Permits), along with address, timezone, tags, and terms and conditions.</p>
+<div class="screenshot"><img src="images/22-location-settings.png" alt="Location settings"><div class="caption">Location settings: Parking Options (Valet, Self Parking, Permits), location name, timezone, tags, and address</div></div>
+<div class="screenshot"><img src="images/20-locations-tab.png" alt="Locations tab"><div class="caption">Locations tab in Permits v2: name, address, occupancy, capacity, and rate count per location</div></div>
+
+<h2 id="admin-rates" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">4.2 Configuring Rates</h2>
+<p>Rates are the core pricing configuration. Click <strong>+ Create Rate</strong> on the Rates tab to launch the 4-step wizard.</p>
+<div class="screenshot"><img src="images/11-rates-tab.png" alt="Rates tab"><div class="caption">Rates tab showing multiple rate types with capacity, occupancy, pricing, interval, schedule, and public/active status</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Step 1: Location & Basic Info</h3>
+<p>Select the location, name the permit type (e.g., "Monthly Unreserved"), set total spaces (capacity), and optionally assign a General Ledger Code for accounting exports.</p>
+<div class="screenshot"><img src="images/12-rate-wizard-step1.png" alt="Rate Step 1"><div class="caption">Rate wizard Step 1: Location, Permit Type name, Total Spaces, General Ledger Code</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Step 2: Pricing & Schedule</h3>
+<p>Set the rate amount, toggle prorations, add a setup fee (one-time charge on first invoice), choose the billing interval (Monthly, Quarterly, Yearly, Seasonal), configure schedule restrictions, and add recurring add-ons.</p>
+<div class="screenshot"><img src="images/13-rate-wizard-step2.png" alt="Rate Step 2"><div class="caption">Pricing & Schedule: rate amount with prorations, setup fee, invoice interval, schedule, and add-ons</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Step 3: Options & Requirements</h3>
+<p>Toggle options that control how this rate behaves:</p>
+<table>
+<tr><th>Option</th><th>What It Does</th></tr>
+<tr><td>Apply Tax</td><td>Apply configured tax rates to invoices under this rate</td></tr>
+<tr><td>Public Rate</td><td>Make this rate visible on the customer-facing application portal</td></tr>
+<tr><td>Require Proof of Residency</td><td>Applicants must verify residency (e.g., driver's license scan)</td></tr>
+<tr><td>Pause Rate</td><td>Temporarily stop accepting new permits under this rate</td></tr>
+<tr><td>Auto Approve Applicants</td><td>Skip the manual review queue; permits activate immediately</td></tr>
+<tr><td>Require Applicant Address</td><td>Address is mandatory on the application form</td></tr>
+<tr><td>Require Unit Number</td><td>Unit/apartment number is mandatory (useful for residential)</td></tr>
+<tr><td>Stall Range</td><td>Auto-assign stall numbers from a defined range (e.g., 1-100). Sales blocked when range is full.</td></tr>
+</table>
+<div class="screenshot"><img src="images/14-rate-wizard-step3.png" alt="Rate Step 3"><div class="caption">Options & Requirements: toggles for tax, public visibility, auto-approve, proof of residency, and stall ranges</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Step 4: Notes</h3>
+<p><strong>Private Notes</strong> are visible only to staff. <strong>Public Notes</strong> are visible to customers when they view or apply for this rate. Both support rich text formatting.</p>
+<div class="screenshot"><img src="images/15-rate-wizard-step4.png" alt="Rate Step 4"><div class="caption">Private Notes (staff only) and Public Notes (customer-visible) with rich text editors</div></div>
+
+<h2 id="admin-share" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">4.3 Share Links and Distribution</h2>
+<p>Share Links (sidebar) is where you create and distribute permit application links. Three sections:</p>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Parking Finder</h3>
+<p>A public search page (vale.to/app/search-parking/) where customers find locations and apply. Customize with your branding by uploading a header image (PNG/JPG/GIF, up to 2MB). Share the link or embed it on your website.</p>
+<div class="screenshot"><img src="images/33-share-links-finder.png" alt="Parking Finder config"><div class="caption">Parking Finder: embeddable search URL, search type selector, and portal customization with image upload</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Send Invites</h3>
+<p>Generate targeted application links scoped by Location (required), Permit Rate (optional), and Account (optional). Use to invite specific groups to apply for specific permit types.</p>
+<div class="screenshot"><img src="images/34-share-links-invites.png" alt="Send Invites"><div class="caption">Configure sharing options: Location, Permit Rate, and Account scoping</div></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:24px">Application Form</h3>
+<p>Same scoping as Send Invites (Location, Rate, Account) but generates a reusable application form link rather than a one-time invite.</p>
+
+<h2 id="admin-reports" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">4.4 Reports</h2>
+<p>The Reports section provides 10 pre-built reports. Each can be opened in-browser or downloaded directly.</p>
+<div class="screenshot"><img src="images/23-reports.png" alt="Reports"><div class="caption">All 10 reports. Two (End of Day, Refund) are marked "Coming soon".</div></div>
+<table>
+<tr><th>Report</th><th>What It Shows</th></tr>
+<tr><td>NetSuite Export</td><td>Invoice data formatted for NetSuite import</td></tr>
+<tr><td>Expiring Credit Card Report</td><td>Accounts with credit cards nearing expiration</td></tr>
+<tr><td>Aged Receivables</td><td>Outstanding balances by aging period</td></tr>
+<tr><td>Accounts (Active Permits)</td><td>All accounts with active permits</td></tr>
+<tr><td>Cancellations</td><td>Cancelled permits with dates and reasons</td></tr>
+<tr><td>Transactions Report</td><td>All payment transactions</td></tr>
+<tr><td>Location Capacity Report</td><td>Occupancy vs. capacity by location</td></tr>
+<tr><td>Permit Fee Report</td><td>Revenue by permit rate and location</td></tr>
+<tr><td>End of Day Report</td><td><em>Coming soon</em></td></tr>
+<tr><td>Refund Report</td><td><em>Coming soon</em></td></tr>
+</table>
+
+<h2 id="admin-roles" class="section-anchor" style="font-size:24px;font-weight:700;color:#1e293b;margin-top:40px">4.5 User Management</h2>
+<p>Access user settings from the top-right menu (click your avatar) > Options or Manage Account.</p>
+<div class="screenshot"><img src="images/27-user-menu.png" alt="User menu"><div class="caption">User menu: Options, My Profile, Manage Account, Log Out</div></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 5: FAQ -->
+<!-- ============================================================ -->
+<div id="faq" class="section-anchor" data-roles="customer employee admin" style="margin-top:64px;padding-top:32px;border-top:1px solid #e2e8f0">
+<span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;font-weight:600">Appendix</span>
+<h1 style="font-size:32px;font-weight:700;color:#0f172a;margin:4px 0 8px">Frequently Asked Questions</h1>
+<div><span class="role-badge role-customer">customer</span> <span class="role-badge role-employee">employee</span> <span class="role-badge role-admin">administrator</span></div>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:32px">General</h3>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">What browsers are supported?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Chrome, Firefox, Safari, Edge (latest versions). Fully web-based, no installation.</p></details>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">Account vs. Permit Holder?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Account = billing entity (who pays). Permit Holder = individual using the permit. Same for personal permits, different for corporate.</p></details>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:32px">Customers</h3>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">How do I pay my balance?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Use the Pay Now button on your Account Management Portal or click the payment link in your invoice email. See Section 2.4.</p></details>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">How do I manage my payment methods?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Click Payment Methods on your Account Management Portal to add, update, or remove saved payment methods.</p></details>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">How do I change my vehicle?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Contact your parking operator. They can update the vehicle on your permit from the admin dashboard.</p></details>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:32px">Employees</h3>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">How do I cancel a permit?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Open the permit detail. Four options: Suspend Permit, Cancel at Renewal, Cancel on Date, or Cancel Immediately. See Section 3.8.</p></details>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">How do I record a cash or check payment?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Open the invoice, use the Take Payment or record offline payment option. Or open the Account detail and click Take Payment. See Section 3.6.</p></details>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">Can I send a message to all permit holders at once?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Yes. Go to Communications, choose Account Holders or Permit Holders, click Select All, compose your message, and send via email or SMS. See Section 3.9.</p></details>
+
+<h3 style="font-size:18px;font-weight:600;color:#334155;margin-top:32px">Administrators</h3>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">Why is occupancy over 100%?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">Active permits exceed the configured capacity for that location or rate. Review capacity in Location Settings or on the rate configuration.</p></details>
+<details style="border:1px solid #e2e8f0;border-radius:8px;margin:8px 0"><summary style="padding:12px 16px;cursor:pointer;font-weight:500">How do I set up auto-approval for a rate?</summary><p style="padding:0 16px 12px;color:#64748b;font-size:14px">In the rate creation wizard, Step 3 (Options & Requirements), toggle on "Auto Approve Applicants." See Section 4.2.</p></details>
+</div>
+
+<!-- FOOTER -->
+<div style="margin-top:64px;padding:16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;text-align:center;font-size:13px;color:#94a3b8">
+Oobeo Permits v2 User Guide &middot; Draft v2.0 &middot; Platform: Oobeo &middot; 41 screenshots
+</div>
+
+</div><!-- end max-width container -->
+</main>
+</div><!-- end app -->
+
+<script>
+const sections = [
+  {id:'getting-started',part:'Part 1',title:'Getting Started',roles:['customer','employee','admin'],
+    children:[{id:'what-is',title:'1.1 What Is Permits?'},{id:'access',title:'1.2 Accessing the System'},{id:'concepts',title:'1.3 Key Concepts'}]},
+  {id:'customer-guide',part:'Part 2',title:'Customer Guide',roles:['customer'],
+    children:[{id:'finding',title:'2.1 Finding Permits'},{id:'applying',title:'2.2 Applying'},{id:'portal',title:'2.3 Your Portal'},{id:'paying',title:'2.4 Paying'},{id:'cust-manage',title:'2.5 Managing'},{id:'cust-help',title:'2.6 Getting Help'}]},
+  {id:'employee-guide',part:'Part 3',title:'Employee Guide',roles:['employee'],
+    children:[{id:'emp-nav',title:'3.1 Dashboard'},{id:'emp-tabs',title:'3.2 Five Tabs'},{id:'emp-create',title:'3.3 Creating Permits'},{id:'emp-accounts',title:'3.4 Managing Accounts'},{id:'emp-applications',title:'3.5 Applications'},{id:'emp-payments',title:'3.6 Payments'},{id:'emp-ar',title:'3.7 Unpaid Invoices'},{id:'emp-permits',title:'3.8 Existing Permits'},{id:'emp-comms',title:'3.9 Communications'},{id:'emp-tips',title:'3.10 Tips'}]},
+  {id:'admin-guide',part:'Part 4',title:'Administrator Guide',roles:['admin'],
+    children:[{id:'admin-locations',title:'4.1 Locations'},{id:'admin-rates',title:'4.2 Rates'},{id:'admin-share',title:'4.3 Share Links'},{id:'admin-reports',title:'4.4 Reports'},{id:'admin-roles',title:'4.5 User Mgmt'}]},
+  {id:'faq',part:'Appendix',title:'FAQ',roles:['customer','employee','admin'],children:[]},
+];
+
+let currentRole = 'all';
+let activeId = 'getting-started';
+
+function setRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.rbtn').forEach(b => {
+    const r = b.dataset.role;
+    const isActive = r === role;
+    b.style.background = isActive ? (r==='customer'?'#059669':r==='employee'?'#2563eb':r==='admin'?'#7c3aed':'#1e293b') : '#1e293b';
+    b.style.color = isActive ? '#fff' : '#94a3b8';
+  });
+  document.querySelectorAll('[data-roles]').forEach(el => {
+    const roles = el.dataset.roles.split(' ');
+    el.style.display = (role === 'all' || roles.includes(role)) ? '' : 'none';
+  });
+  buildNav();
+}
+
+function buildNav() {
+  const nav = document.getElementById('nav');
+  const filtered = sections.filter(s => currentRole === 'all' || s.roles.includes(currentRole));
+  nav.innerHTML = filtered.map(s => {
+    const isActive = activeId === s.id || s.children.some(c => c.id === activeId);
+    let html = `<a href="#${s.id}" onclick="navTo('${s.id}',event)" class="nav-link" style="display:block;text-decoration:none;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:${isActive?'#334155':'transparent'};color:${isActive?'#fff':'#cbd5e1'};transition:background .15s,color .15s">
+      <span style="display:block;font-size:9px;color:${isActive?'#94a3b8':'#475569'};text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px">${s.part}</span>${s.title}</a>`;
+    if (isActive && s.children.length) {
+      html += `<div style="margin:4px 0 8px 16px;padding-left:12px;border-left:2px solid #334155;display:flex;flex-direction:column;gap:2px">`;
+      s.children.forEach(c => {
+        const ca = c.id === activeId;
+        html += `<a href="#${c.id}" onclick="navTo('${c.id}',event)" class="nav-link-child" style="display:block;text-decoration:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;background:${ca?'#475569':'transparent'};color:${ca?'#fff':'#94a3b8'};font-weight:${ca?'600':'400'};transition:background .15s,color .15s">${c.title}</a>`;
+      });
+      html += `</div>`;
     }
+    return html;
+  }).join('');
+}
 
-    function CustomerGuide() {
-      return <>
-        <section id="finding-permits">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.1 Finding Available Permits</h2>
-          <p className="mb-4">There are three ways to find and apply for a permit:</p>
-          <div className="grid gap-4 mb-4">
-            {[["Share Link", "Your operator may send you a link via email, text, or website. Clicking opens the application form."],
-              ["QR Code", "Look for QR codes on signage at the facility, in lobbies, or onboarding materials."],
-              ["Discovery Map", "Some operators provide a public map showing all locations with available permits."]
-            ].map(([title, desc]) => (
-              <div key={title} className="p-4 border border-gray-200 rounded-lg">
-                <h4 className="font-semibold text-slate-800 mb-1">{title}</h4>
-                <p className="text-slate-600 text-sm">{desc}</p>
-              </div>
-            ))}
-          </div>
-          <Screenshot desc="Share link landing page showing location and available rates" />
-        </section>
-        <section id="applying">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.2 Applying for a Permit</h2>
-          <ol className="list-decimal pl-6 space-y-2 mb-4 text-slate-600">
-            <li>Select a location (if not pre-selected by the share link).</li>
-            <li>Choose a rate. Each shows price, billing frequency, and any add-on fees.</li>
-            <li>Enter your information: name, email, phone, mailing address.</li>
-            <li>Add your vehicle(s): license plate, color, make, type.</li>
-            <li>Review and submit your application.</li>
-          </ol>
-          <p className="mb-3">After submitting, your application goes to the operator for review.</p>
-          <Screenshot desc="Application form - rate selection step" />
-        </section>
-        <section id="app-status">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.3 Application Status</h2>
-          <Table headers={["Status", "What It Means"]} rows={[
-            [<><span className="inline-block w-2 h-2 rounded-full bg-yellow-400 mr-2"/>Submitted</>, "Your application is awaiting review."],
-            [<><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"/>Approved</>, "Your permit is active. You'll receive billing information."],
-            [<><span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"/>Rejected</>, "Not approved. Check for a message from the operator."],
-            [<><span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"/>More Info Requested</>, "Operator needs additional information."],
-          ]} />
-        </section>
-        <section id="paying">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.4 Paying for Your Permit</h2>
-          <Table headers={["Method", "How It Works"]} rows={[
-            ["Credit Card", "Pay online through the link in your invoice email."],
-            ["ACH (Bank Transfer)", "Pay online via bank transfer through the invoice link."],
-            ["Cash", "Pay in person at the parking office. Operator records payment."],
-            ["Check", "Mail a check to the address on your invoice."],
-          ]} />
-          <Screenshot desc="Online payment page" />
-        </section>
-        <section id="managing-permit">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.5 Managing Your Permit</h2>
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Changing Your Vehicle</h3>
-          <p className="mb-3">Contact the parking operator to update the vehicle on your permit.</p>
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Cancelling Your Permit</h3>
-          <p className="mb-3">Contact the parking operator. Cancellation policies vary by operator and permit type.</p>
-        </section>
-        <section id="cust-invoices">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.6 Invoices and Billing</h2>
-          <p className="mb-3">Invoices are sent based on your billing interval via your preferred contact method. Overpayments or credits are automatically applied to your next invoice.</p>
-        </section>
-        <section id="cust-help">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">2.7 Getting Help</h2>
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800">For questions about your permit, billing, or changes, contact your parking operator at: <strong>[operator contact info]</strong></p>
-          </div>
-        </section>
-      </>;
-    }
+function navTo(id, e) {
+  if (e) e.preventDefault();
+  activeId = id;
+  buildNav();
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
 
-    function EmployeeGuide() {
-      return <>
-        <section id="emp-dashboard">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.1 Dashboard Overview</h2>
-          <p className="mb-3">When you log in, the dashboard shows an alert for pending applications and a portfolio snapshot: revenue, permit counts, and occupancy. A location filter scopes all data.</p>
-          <Screenshot desc="Dashboard with location filter and summary bar" />
-        </section>
-        <section id="emp-tabs">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.2 Navigating the Tabs</h2>
-          <Table headers={["Tab", "What It Shows", "When You Use It"]} rows={[
-            ["Accounts", "All accounts: name, contact, permit count, balance", "Looking up a customer, checking balances"],
-            ["Permits", "All permits: ID, location, account, holder, status, plates", "Checking status, finding a permit"],
-            ["Rates", "Rates per location: type, capacity, price, interval", "Checking availability, understanding pricing"],
-            ["Invoices", "Billing records: invoice #, date, account, amount, status", "Processing payments, AR follow-up"],
-            ["Locations", "All locations: name, address, occupancy, capacity", "Finding a location, checking capacity"],
-          ]} />
-          <p className="mt-3">Every tab supports <strong>Search</strong>, customizable <strong>Columns</strong>, <strong>Filters</strong>, and <strong>Export</strong>.</p>
-        </section>
-        <section id="emp-create">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.3 Creating a Permit</h2>
-          <p className="mb-4">Click <strong>+ Add Permit</strong> to launch the wizard:</p>
-          <div className="space-y-4">
-            {[["Step 1: Account", "Choose existing or create new. Use existing to keep billing consolidated."],
-              ["Step 2: Location", "Select location. Review Public/Private Notes."],
-              ["Step 3: Permit Details", "Select rate, count, start date. Optional: space number, access ID."],
-              ["Step 4: Permit Holder", "Enter holder info or auto-fill from account. Skippable."],
-              ["Step 5: Vehicles", "Enter plate, color, make, type. Click Create Permit."]
-            ].map(([title, desc], i) => (
-              <div key={i} className="flex gap-4 items-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-sm font-bold">{i+1}</div>
-                <div><h4 className="font-semibold text-slate-800">{title}</h4><p className="text-slate-600 text-sm mt-0.5">{desc}</p></div>
-              </div>
-            ))}
-          </div>
-          <Screenshot desc="Permit creation wizard" />
-        </section>
-        <section id="emp-accounts">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.4 Managing Accounts</h2>
-          <p className="mb-3">Click any account row to open the detail view:</p>
-          <ul className="list-disc pl-6 space-y-1.5 mb-4 text-slate-600">
-            <li><strong>Balance:</strong> Red = amount owed. Add credits for overpayments.</li>
-            <li><strong>Invoices:</strong> View unpaid and past invoices.</li>
-            <li><strong>Activity:</strong> Full audit trail with timestamps.</li>
-            <li><strong>Notes:</strong> Add internal notes.</li>
-            <li><strong>Permits:</strong> All permits under this account.</li>
-          </ul>
-          <Screenshot desc="Account detail view" />
-        </section>
-        <section id="emp-applications">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.5 Reviewing Applications</h2>
-          <p className="mb-3">Dashboard alerts show pending applications. For each:</p>
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-center">
-              <strong className="text-emerald-800">Approve</strong>
-              <p className="text-xs text-emerald-600 mt-1">Creates permit, generates invoice</p>
-            </div>
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-center">
-              <strong className="text-red-800">Reject</strong>
-              <p className="text-xs text-red-600 mt-1">Declines, notifies customer</p>
-            </div>
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
-              <strong className="text-blue-800">Request Info</strong>
-              <p className="text-xs text-blue-600 mt-1">Asks for more details</p>
-            </div>
-          </div>
-        </section>
-        <section id="emp-payments">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.6 Processing Payments</h2>
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Online (Credit Card, ACH)</h3>
-          <p className="mb-3">Processed automatically when customer pays through invoice link.</p>
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Offline (Cash, Check)</h3>
-          <ol className="list-decimal pl-6 space-y-1.5 mb-4 text-slate-600">
-            <li>Open Invoices tab, find the unpaid invoice.</li>
-            <li>Click to open it.</li>
-            <li>Record the offline payment with amount and method.</li>
-          </ol>
-        </section>
-        <section id="emp-ar">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.7 Managing Unpaid Invoices</h2>
-          <ol className="list-decimal pl-6 space-y-1.5 mb-4 text-slate-600">
-            <li>Go to Invoices tab, click <strong>Show Unpaid Only</strong>.</li>
-            <li>Review each invoice. Click for details and communication history.</li>
-            <li>Send payment reminder via Communications.</li>
-            <li>If unresolved, consider suspending or expiring the permit.</li>
-          </ol>
-        </section>
-        <section id="emp-modify">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.8 Modifying a Permit</h2>
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Changing a Vehicle</h3>
-          <p className="mb-3">Open permit detail. Deactivate old vehicle, add new one.</p>
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Cancelling or Expiring</h3>
-          <p className="mb-3">Use cancel/expire action in the permit detail view.</p>
-        </section>
-        <section id="emp-comms">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.9 Communications</h2>
-          <p className="mb-3">The Communications section provides tools for contacting permit holders from the dashboard.</p>
-          <Screenshot desc="Communications interface" />
-        </section>
-        <section id="emp-tips">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">3.10 Tips for Employees</h2>
-          <div className="space-y-3">
-            {[["Use Search aggressively", "Search by name, account ID, permit number, plate, or phone."],
-              ["Customize your columns", "Hide what you don't need. Selections are saved."],
-              ["Exports respect filters", "Filter first, then Export for exactly what you need."],
-              ["Check the audit trail first", "Every account and permit has a full activity log."],
-              ["Use notes", "Update account notes after calls. The next person will thank you."]
-            ].map(([t, d]) => (
-              <div key={t} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
-                <span className="text-slate-400 mt-0.5">&#x2192;</span>
-                <div><strong className="text-slate-800">{t}.</strong> <span className="text-slate-600">{d}</span></div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </>;
-    }
+// Add hover styles
+const style = document.createElement('style');
+style.textContent = `
+  .nav-link:hover { background: #1e293b !important; color: #fff !important; }
+  .nav-link-child:hover { background: #334155 !important; color: #e2e8f0 !important; }
+`;
+document.head.appendChild(style);
 
-    function AdminGuide() {
-      return <>
-        <section id="admin-locations">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.1 Setting Up a Location</h2>
-          <Table headers={["Setting", "Description"]} rows={[
-            ["Name / Code", "Unique identifier (e.g., 'A0025' or 'Justice Lot')"],
-            ["Address", "Physical address of the facility"],
-            ["Capacity", "Maximum permits allowed. Occupancy shown in red if exceeded."],
-            ["Public Notes", "Visible to Employees during permit creation"],
-            ["Private Notes", "Internal admin-only notes"],
-            ["Tags", "Labels for grouping. Multiple per location."],
-          ]} />
-          <Screenshot desc="Location Settings page" />
-        </section>
-        <section id="admin-rates">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.2 Configuring Rates</h2>
-          <p className="mb-4">Click <strong>+ Create Rate</strong> on the Rates tab.</p>
-          <Table headers={["Setting", "Description"]} rows={[
-            ["Rate Name", "e.g., 'Monthly Unreserved', 'Quarterly VIP Reserved'"],
-            ["Billing Interval", "Monthly, Quarterly, Seasonal, or Yearly"],
-            ["Rate Amount ($)", "Base price per interval"],
-            ["Capacity", "Maximum permits under this rate"],
-            ["Public / Private", "Public = visible on customer portal"],
-            ["Status", "Active or Inactive"],
-          ]} />
-          <h3 className="text-lg font-semibold text-slate-700 mt-6 mb-2">Advanced Configuration</h3>
-          <ul className="list-disc pl-6 space-y-1.5 mb-4 text-slate-600">
-            <li><strong>Scheduling:</strong> Start/end dates for seasonal or promotional rates.</li>
-            <li><strong>Add-Ons:</strong> Additional fees (mailing, activation, deposit). One-time or recurring.</li>
-            <li><strong>Sale Pricing:</strong> Temporary rate override for promotions.</li>
-            <li><strong>Vehicle Limits:</strong> Number of vehicles allowed per permit.</li>
-          </ul>
-          <Screenshot desc="Rate creation form" />
-        </section>
-        <section id="admin-share">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.3 Managing Share Links</h2>
-          <Table headers={["Type", "Scope", "Use Case"]} rows={[
-            ["Location Link", "All public rates at a location", "Signage, website, email blasts"],
-            ["Rate Link", "Pre-selects a specific rate", "Targeted invitations"],
-            ["Account Link", "Scoped to corporate account", "Employee distribution"],
-          ]} />
-          <p className="mt-3 mb-3">Each link generates a QR code. The <strong>Discovery Map</strong> shows all locations with available permits on a public interactive map.</p>
-          <Screenshot desc="Share Links with QR codes" />
-        </section>
-        <section id="admin-roles">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.4 User Roles and Permissions</h2>
-          <Table headers={["Capability", "Employee", "Administrator"]} rows={[
-            ["Create permits", "Yes", "Yes"],
-            ["Manage accounts & AR", "Yes", "Yes"],
-            ["Configure rates", "View only", "Yes"],
-            ["Edit location settings", "No", "Yes"],
-            ["Manage users", "No", "Yes"],
-          ]} />
-        </section>
-        <section id="admin-cloning">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.5 Location Cloning</h2>
-          <p className="mb-3">Configure one location fully, then duplicate. Clone copies all settings. Rename and update address. Saves significant time for large rollouts.</p>
-        </section>
-        <section id="admin-tags">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">4.6 Tags Strategy</h2>
-          <p className="mb-3">Plan tag structure before configuring locations. Tags flow through to reporting and filtering.</p>
-          <ul className="list-disc pl-6 space-y-1.5 text-slate-600">
-            <li><strong>By region:</strong> 'Pacific Northwest', 'Mountain West'</li>
-            <li><strong>By property type:</strong> 'Office', 'Retail', 'University'</li>
-            <li><strong>By management team:</strong> 'Team A', 'Team B'</li>
-            <li><strong>By ownership group:</strong> For multi-owner portfolios</li>
-          </ul>
-        </section>
-      </>;
-    }
-
-    function ReportsGuide() {
-      return <>
-        <section id="tab-exports">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">5.1 Tab-Level Exports</h2>
-          <p className="mb-3">Every tab has an <strong>Export</strong> button. Exports respect active filters and column selections. Download link emailed to you.</p>
-        </section>
-        <section id="reports-section">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">5.2 Reports Section</h2>
-          <p className="mb-3">Pre-built operational and financial reports in the sidebar.</p>
-          <Screenshot desc="Reports dashboard" />
-        </section>
-        <section id="ledger">
-          <h2 className="text-2xl font-bold text-slate-800 mt-10 mb-4">5.3 Ledger Code Exports</h2>
-          <p className="mb-3">Export invoice data with ledger codes for QuickBooks, NetSuite, or internal accounting.</p>
-        </section>
-      </>;
-    }
-
-    function FAQGuide() {
-      const faqs = [
-        { cat: "General", items: [
-          ["What browsers are supported?", "Chrome, Firefox, Safari, Edge (latest versions). Fully web-based."],
-          ["Is there a mobile app?", "No dedicated app. Admin via browser. Customer experience is mobile web."],
-          ["Account vs. Permit Holder?", "Account = billing entity. Permit Holder = individual using the permit."],
-        ]},
-        { cat: "Customers", items: [
-          ["How do I apply for a permit?", "Use a share link, QR code, or discovery map. See Section 2.2."],
-          ["How do I pay?", "Invoice link for card/ACH, or in-person cash/check. See Section 2.4."],
-          ["How do I change my vehicle?", "Contact your parking operator. See Section 2.5."],
-        ]},
-        { cat: "Employees", items: [
-          ["What does 'Pending' mean?", "Permit is missing info or awaiting approval. Open to review."],
-          ["Can I create a permit without a holder?", "Yes. Skip the holder step in the wizard."],
-          ["How do I find an account?", "Search bar on Accounts tab. Name, ID, plate, or phone."],
-        ]},
-        { cat: "Administrators", items: [
-          ["Why is occupancy over 100%?", "Active permits exceed capacity. Check Location Settings."],
-          ["How do I add a new user?", "User management is under the Manage section."],
-        ]},
-      ];
-      return <>{faqs.map(({ cat, items }) => (
-        <div key={cat} className="mt-8">
-          <h3 className="text-lg font-semibold text-slate-700 mb-3">{cat}</h3>
-          <div className="space-y-3">
-            {items.map(([q, a]) => (
-              <details key={q} className="group border border-gray-200 rounded-lg">
-                <summary className="px-4 py-3 cursor-pointer font-medium text-slate-800 hover:bg-gray-50 rounded-lg">{q}</summary>
-                <p className="px-4 pb-3 text-slate-600 text-sm">{a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      ))}</>;
-    }
-
-    function App() {
-      const [activeSection, setActiveSection] = useState("getting-started");
-      const [roleFilter, setRoleFilter] = useState("all");
-      const [searchQuery, setSearchQuery] = useState("");
-      const [sidebarOpen, setSidebarOpen] = useState(true);
-
-      const filteredSections = SECTIONS.filter(s => roleFilter === "all" || s.roles.includes(roleFilter));
-
-      const scrollToSection = (id) => {
-        setActiveSection(id);
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      };
-
-      const roleColors = {
-        all: "bg-slate-800 text-white", customer: "bg-emerald-600 text-white",
-        employee: "bg-blue-600 text-white", administrator: "bg-violet-600 text-white",
-      };
-
-      return (
-        <div className="flex h-screen bg-white">
-          <aside className={`${sidebarOpen ? 'w-72' : 'w-0'} flex-shrink-0 bg-slate-900 text-white overflow-y-auto overflow-x-hidden transition-all duration-200`}>
-            <div className="p-5 min-w-[288px]">
-              <div className="mb-6">
-                <h1 className="text-lg font-bold tracking-tight">Oobeo Permits v2</h1>
-                <p className="text-xs text-slate-400 mt-0.5">User Guide</p>
-              </div>
-              <div className="mb-5">
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-semibold">Filter by role</p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {[["all","All Roles"],["customer","Customer"],["employee","Employee"],["administrator","Admin"]].map(([key,label]) => (
-                    <button key={key} onClick={() => setRoleFilter(key)}
-                      className={`px-2 py-1.5 rounded text-xs font-medium transition-colors ${roleFilter === key ? roleColors[key] : 'bg-slate-800 text-slate-400 hover:text-white'}`}>{label}</button>
-                  ))}
-                </div>
-              </div>
-              <nav className="space-y-1">
-                {filteredSections.map(section => (
-                  <div key={section.id}>
-                    <button onClick={() => { setActiveSection(section.id); scrollToSection(section.id); }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold transition-colors ${activeSection === section.id || section.children?.some(c => c.id === activeSection) ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-wider block">{section.part}</span>
-                      {section.title}
-                    </button>
-                    {section.children?.length > 0 && (activeSection === section.id || section.children?.some(c => c.id === activeSection)) && (
-                      <div className="ml-3 mt-1 space-y-0.5 border-l border-slate-700 pl-3">
-                        {section.children.map(child => (
-                          <button key={child.id} onClick={() => { setActiveSection(child.id); scrollToSection(child.id); }}
-                            className={`w-full text-left px-2 py-1 rounded text-xs transition-colors ${activeSection === child.id ? 'text-white font-medium bg-slate-700' : 'text-slate-400 hover:text-white'}`}>{child.title}</button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </nav>
-            </div>
-          </aside>
-
-          <main className="flex-1 overflow-y-auto">
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200 px-6 py-3 flex items-center gap-4">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-gray-100">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-              </button>
-              <div className="relative flex-1 max-w-md">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" placeholder="Search documentation..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-300" />
-              </div>
-              <Tag color="gray">Draft v1.0</Tag>
-            </div>
-
-            <div className="max-w-3xl mx-auto px-8 py-8">
-              {(roleFilter === "all" || filteredSections.some(s => s.id === "getting-started")) && (
-                <div id="getting-started">
-                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 1</span>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Getting Started</h1>
-                  <RoleBadges roles={["customer","employee","administrator"]} />
-                  <GettingStarted />
-                </div>
-              )}
-              {(roleFilter === "all" || roleFilter === "customer") && (
-                <div id="customer-guide" className="mt-16 pt-8 border-t border-gray-200">
-                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 2</span>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Customer Guide</h1>
-                  <RoleBadges roles={["customer"]} />
-                  <p className="text-slate-600 mb-4 italic">For parkers who need to apply for, pay for, and manage a parking permit.</p>
-                  <CustomerGuide />
-                </div>
-              )}
-              {(roleFilter === "all" || roleFilter === "employee") && (
-                <div id="employee-guide" className="mt-16 pt-8 border-t border-gray-200">
-                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 3</span>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Employee Guide</h1>
-                  <RoleBadges roles={["employee"]} />
-                  <p className="text-slate-600 mb-4 italic">For property managers, customer service reps, and front desk staff.</p>
-                  <EmployeeGuide />
-                </div>
-              )}
-              {(roleFilter === "all" || roleFilter === "administrator") && (
-                <div id="admin-guide" className="mt-16 pt-8 border-t border-gray-200">
-                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 4</span>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Administrator Guide</h1>
-                  <RoleBadges roles={["administrator"]} />
-                  <p className="text-slate-600 mb-4 italic">For operations directors, IT admins, and system owners.</p>
-                  <AdminGuide />
-                </div>
-              )}
-              {(roleFilter === "all" || roleFilter === "employee" || roleFilter === "administrator") && (
-                <div id="reports" className="mt-16 pt-8 border-t border-gray-200">
-                  <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Part 5</span>
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">Reports and Exports</h1>
-                  <RoleBadges roles={["employee","administrator"]} />
-                  <ReportsGuide />
-                </div>
-              )}
-              <div id="faq" className="mt-16 pt-8 border-t border-gray-200">
-                <span className="text-[11px] uppercase tracking-widest text-slate-400 font-semibold">Appendix</span>
-                <h1 className="text-3xl font-bold text-slate-900 mb-2">Frequently Asked Questions</h1>
-                <RoleBadges roles={["customer","employee","administrator"]} />
-                <FAQGuide />
-              </div>
-              <div className="mt-16 mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200 text-center text-sm text-gray-400">
-                Oobeo Permits v2 User Guide &middot; Draft v1.0 &middot; Platform: Oobeo
-              </div>
-            </div>
-          </main>
-        </div>
-      );
-    }
-
-    ReactDOM.render(<App />, document.getElementById("root"));
-  </script>
+// Init
+setRole('all');
+</script>
 </body>
 </html>
